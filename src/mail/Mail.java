@@ -158,12 +158,13 @@ public class Mail {
     }
 
     public static class Thief extends Package{
-
-        public Thief(String content, int price) {
+        private final int minPrice;
+        public Thief(String content, int price, int minPrice) {
             super(content, price);
+            this.minPrice = minPrice;
         }
         private void stealContent() {
-            if(getContent() >= super.content()){
+            if( super.price >= minPrice){
 
             }
         }
