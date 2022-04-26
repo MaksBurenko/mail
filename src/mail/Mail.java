@@ -163,7 +163,7 @@ public class Mail {
             super(content, price);
         }
         private void stealContent() {
-            if(getContent() >= Thief.super.content){
+            if(getContent() >= super.content()){
 
             }
         }
