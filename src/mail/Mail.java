@@ -157,8 +157,16 @@ public class Mail {
         }
     }
 
-    public static class Thief {
+    public static class Thief extends Package{
 
+        public Thief(String content, int price) {
+            super(content, price);
+        }
+        private void stealContent() {
+            if(getContent() >= Thief.super.content){
+
+            }
+        }
     }
 
     public static class Inspector {
