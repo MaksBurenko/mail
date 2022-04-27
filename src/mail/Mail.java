@@ -136,15 +136,15 @@ public class Mail {
         }
     }
 
-    public static class UntrustworthyMailWorker {
-
+    public static class UntrustworthyMailWorker extends RealMailService {
+        MailService [] = new ;
     }
 
     public static class Spy extends MailMessage{
         public Spy(String from, String to, String message) {
             super(from, to, message);
         }
-        private void configureLogging() {
+        public void configureLogging() {
             Logger logger = Logger.getLogger("MailMessage");
             logger.setLevel(Level.ALL);
 
@@ -158,15 +158,23 @@ public class Mail {
     }
 
     public static class Thief extends Package{
-        private final int minPrice;
-        public Thief(String content, int price, int minPrice) {
+        int minPrice;
+        int nullPrice = 0;
+        public Thief (String content, int price, int minPrice) {
             super(content, price);
             this.minPrice = minPrice;
         }
-        private void stealContent() {
+        public int getPrice() {
             if( super.price >= minPrice){
-
+                return nullPrice;
             }
+            return super.price;
+        }
+        public String getContent() {
+            if( super.price >= minPrice){
+                return ("stones instead of " + super.content);
+            }
+            return super.content;
         }
     }
 
