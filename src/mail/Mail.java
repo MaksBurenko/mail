@@ -2,7 +2,8 @@ package mail;
 import  java.util.logging.*;
 public class Mail {
 
-    /*Интерфейс, который задает класс, который может каким-либо образом обработать почтовый объект.*/
+    /*Интерфейс, который задает класс,
+    который может каким-либо образом обработать почтовый объект.*/
     public static interface MailService {
         Sendable processMail(Sendable mail);
     }
@@ -56,7 +57,8 @@ public class Mail {
         }
     }
 
-    /*Письмо, у которого есть текст, который можно получить с помощью метода `getMessage`*/
+    /*Письмо, у которого есть текст,
+    который можно получить с помощью метода `getMessage`*/
     public static class MailMessage extends AbstractSendable {
 
         private final String message;
@@ -107,7 +109,8 @@ public class Mail {
         }
     }
 
-    /*Класс, который задает посылку. У посылки есть текстовое описание содержимого и целочисленная ценность.*/
+    /*Класс, который задает посылку.
+    У посылки есть текстовое описание содержимого и целочисленная ценность.*/
     public static class Package {
         private final String content;
         private final int price;
@@ -136,8 +139,18 @@ public class Mail {
         }
     }
 
-    public static class UntrustworthyMailWorker extends RealMailService {
-        MailService [] = new ;
+    public static class UntrustworthyMailWorker implements MailService {
+        MailService [] ms= {UntrustworthyMailWorker, Spy, Thief, Inspector} ;
+        public UntrustworthyMailWorker(MailService [] ms) {
+            this.ms = ms;
+        }
+        @Override
+        public Sendable processMail(Sendable mail) {
+            for (MailService temp : ms) {
+                return temp.processMail(mail);
+            }
+            return mail;
+        }
     }
 
     public static class Spy extends MailMessage{
@@ -176,9 +189,25 @@ public class Mail {
             }
             return super.content;
         }
+        public int getStolenValue() {
+
+        }
     }
 
-    public static class Inspector {
+    public static class Inspector  extends Package implements MailService  {
 
+        public Inspector(String content, int price) {
+            super(content, price);
+        }
+
+        @Override
+        public Sendable processMail(Sendable mail) {
+          if (super.content.contains("weapons") || super.content.contains("banned substance")){
+              throw new IllegalPackageException();
+          }
+          if (super.content.contains("stones")) {
+              throw new StolenPackageException();
+          }
+        }
     }
 }
