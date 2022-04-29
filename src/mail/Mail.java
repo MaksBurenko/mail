@@ -140,24 +140,30 @@ public class Mail {
     }
 
     public static class UntrustworthyMailWorker implements MailService {
-        MailService [] ms= {UntrustworthyMailWorker, Spy, Thief, Inspector} ;
+
+        MailService [] ms;
         public UntrustworthyMailWorker(MailService [] ms) {
             this.ms = ms;
         }
         @Override
         public Sendable processMail(Sendable mail) {
+            Sendable m = mail;
             for (MailService temp : ms) {
-                return temp.processMail(mail);
+                m = temp.processMail(mail);
             }
-            return mail;
+            return m;
         }
     }
 
-    public static class Spy extends MailMessage{
+    public static class Spy extends MailMessage implements MailService{
+        public Spy() {}
+
         public Spy(String from, String to, String message) {
             super(from, to, message);
         }
-        public void configureLogging() {
+
+        @Override
+        public Sendable processMail(Sendable mail) {
             Logger logger = Logger.getLogger("MailMessage");
             logger.setLevel(Level.ALL);
 
@@ -167,10 +173,13 @@ public class Mail {
             } else {
                 logger.info ("Usual correspondence: from " + from + " " + "to " + to);
             }
+            return mail;
         }
     }
 
-    public static class Thief extends Package{
+    public static class Thief extends Package implements MailService{
+        public Thief() {}
+
         int minPrice;
         int nullPrice = 0;
         public Thief (String content, int price, int minPrice) {
@@ -180,21 +189,29 @@ public class Mail {
         public int getPrice() {
             if( super.price >= minPrice){
                 return nullPrice;
-            }
+            } else {
             return super.price;
+            }
         }
         public String getContent() {
             if( super.price >= minPrice){
                 return ("stones instead of " + super.content);
+            } else {
+                return super.content;
             }
-            return super.content;
         }
         public int getStolenValue() {
 
         }
+
+        @Override
+        public Sendable processMail(Sendable mail) {
+            return null;
+        }
     }
 
     public static class Inspector  extends Package implements MailService  {
+        public Inspector() {}
 
         public Inspector(String content, int price) {
             super(content, price);
