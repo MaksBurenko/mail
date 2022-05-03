@@ -1,5 +1,8 @@
 package mail;
 import  java.util.logging.*;
+
+import static java.lang.String.format;
+
 public class Mail {
 
     /*Интерфейс, который задает класс,
@@ -142,9 +145,15 @@ public class Mail {
     public static class UntrustworthyMailWorker implements MailService {
 
         MailService [] ms;
-        public UntrustworthyMailWorker(MailService [] ms) {
-            this.ms = ms;
+       public UntrustworthyMailWorker(MailService [] ms) {
+           this.ms = ms;
         }
+
+        private MailService real = new RealMailService();
+
+        //todo  последовательно передает этот объект набору третьих лиц, а затем, в конце концов,
+        // передает получившийся объект непосредственно экземпляру RealMailService
+
         @Override
         public Sendable processMail(Sendable mail) {
             Sendable m = mail;
@@ -153,65 +162,63 @@ public class Mail {
             }
             return m;
         }
+        //todo метод getRealMailService, который возвращает ссылку на внутренний экземпляр RealMailService.
+        public MailService getReal() {
+            return real;
+        }
     }
 
-    public static class Spy extends MailMessage implements MailService{
-        public Spy() {}
+    public static class Spy implements MailService{
 
-        public Spy(String from, String to, String message) {
-            super(from, to, message);
+        private Logger logger;
+
+        public Spy(Logger logger) {
+            this.logger = logger;
         }
 
         @Override
         public Sendable processMail(Sendable mail) {
-            Logger logger = Logger.getLogger("MailMessage");
-            logger.setLevel(Level.ALL);
 
-            if(super.from.equals("Austin Powers") || super.to.equals("Austin Powers")){
-                logger.warning("Detected target mail correspondence: from "
-                        + from + " " + "to " + to + " " + "\"" + getMessage() + "\"");
-            } else {
-                logger.info ("Usual correspondence: from " + from + " " + "to " + to);
+            if(mail instanceof MailMessage) {
+                if (mail.getFrom().equals("Austin Powers") || mail.getTo().equals("Austin Powers")) {
+                    logger.warning(format("Detected target mail correspondence: from {%s} to {%s} \"{%s}\"",
+                            mail.getFrom(), mail.getTo(),((MailMessage) mail).getMessage()));
+                } else {
+                    logger.info("Usual correspondence: from " + mail.getFrom() + " " + "to " + mail.getTo());
+                }
             }
             return mail;
         }
     }
 
-    public static class Thief extends Package implements MailService{
-        public Thief() {}
+    public static class Thief implements MailService{
 
         int minPrice;
-        int nullPrice = 0;
-        public Thief (String content, int price, int minPrice) {
-            super(content, price);
-            this.minPrice = minPrice;
-        }
-        public int getPrice() {
-            if( super.price >= minPrice){
-                return nullPrice;
-            } else {
-            return super.price;
-            }
-        }
-        public String getContent() {
-            if( super.price >= minPrice){
-                return ("stones instead of " + super.content);
-            } else {
-                return super.content;
-            }
-        }
-        public int getStolenValue() {
+        int zeroPrice = 0;
+        int stolenValue = 0;
 
+        public Thief (int minPrice, int zeroPrice) {
+            this.minPrice = minPrice;
+            this.zeroPrice = zeroPrice;
+        }
+
+        public int getStolenValue() {
+            return this.stolenValue;
         }
 
         @Override
         public Sendable processMail(Sendable mail) {
-            return null;
+            if(mail instanceof Package) {
+                if(minPrice >= ((Package) mail).getPrice()){
+                    this.stolenValue = this.stolenValue + ((Package) mail).getPrice();
+                    return ((Package) mail).this.zeroPrice;
+                }
+            }
+            return mail;
         }
     }
 
     public static class Inspector  extends Package implements MailService  {
-        public Inspector() {}
 
         public Inspector(String content, int price) {
             super(content, price);
