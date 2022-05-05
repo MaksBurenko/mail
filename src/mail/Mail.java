@@ -194,24 +194,24 @@ public class Mail {
     public static class Thief implements MailService{
 
         int minPrice;
-        int zeroPrice = 0;
         int stolenValue = 0;
 
-        public Thief (int minPrice, int zeroPrice) {
+        public Thief (int minPrice) {
             this.minPrice = minPrice;
-            this.zeroPrice = zeroPrice;
         }
 
         public int getStolenValue() {
             return this.stolenValue;
         }
 
+
         @Override
         public Sendable processMail(Sendable mail) {
             if(mail instanceof Package) {
                 if(minPrice >= ((Package) mail).getPrice()){
                     this.stolenValue = this.stolenValue + ((Package) mail).getPrice();
-                    return ((Package) mail).this.zeroPrice;
+                    Sendable newMail = (Sendable) new Package("stones instead of " + ((Package) mail).content, 0);
+                    return  newMail;
                 }
             }
             return mail;
