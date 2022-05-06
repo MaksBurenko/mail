@@ -158,7 +158,7 @@ public class Mail {
         public Sendable processMail(Sendable mail) {
             Sendable m = mail;
             for (MailService temp : ms) {
-                m = temp.processMail(mail);
+                m = temp.processMail((Sendable) real);
             }
             return m;
         }
@@ -210,15 +210,15 @@ public class Mail {
             if(mail instanceof Package) {
                 if(minPrice >= ((Package) mail).getPrice()){
                     this.stolenValue = this.stolenValue + ((Package) mail).getPrice();
-                    Sendable newMail = (Sendable) new Package("stones instead of " + ((Package) mail).content, 0);
-                    return  newMail;
+                    Package p = new Package("stones instead of " + ((Package) mail).content, 0);
+                    return  processMail((Sendable) p);
                 }
             }
             return mail;
         }
     }
 
-    public static class Inspector  extends Package implements MailService  {
+    public static class Inspector implements MailService  {
 
         public Inspector(String content, int price) {
             super(content, price);
@@ -232,6 +232,7 @@ public class Mail {
           if (super.content.contains("stones")) {
               throw new StolenPackageException();
           }
+            return mail;
         }
     }
 }
