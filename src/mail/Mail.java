@@ -224,7 +224,7 @@ public class Mail {
         public Sendable processMail(Sendable mail) {
             if (mail instanceof MailPackage) {
                 String c = ((MailPackage) mail).getContent().getContent();
-                if (c.contains("weapons") || (c.contains("banned substance")){
+                if (c.contains("weapons") || (c.contains("banned substance"))){
                     throw new IllegalPackageException();
                 }
                 if (c.contains("stones")) {
@@ -232,6 +232,7 @@ public class Mail {
                 }
                 return mail;
             }
+            return mail;
         }
     }
     public static class IllegalPackageException extends RuntimeException {
