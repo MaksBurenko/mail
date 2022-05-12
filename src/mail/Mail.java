@@ -158,9 +158,9 @@ public class Mail {
         public Sendable processMail(Sendable mail) {
             Sendable m = mail;
             for (MailService temp : ms) {
-                m = temp.processMail((Sendable) real);
+                m = temp.processMail(m);
             }
-            return m;
+            return real.processMail(m);
         }
         //todo метод getRealMailService, который возвращает ссылку на внутренний экземпляр RealMailService.
         public MailService getReal() {
@@ -181,8 +181,7 @@ public class Mail {
 
             if(mail instanceof MailMessage) {
                 if (mail.getFrom().equals("Austin Powers") || mail.getTo().equals("Austin Powers")) {
-                    logger.warning(format("Detected target mail correspondence: from {%s} to {%s} \"{%s}\"",
-                            mail.getFrom(), mail.getTo(),((MailMessage) mail).getMessage()));
+                    logger.warning("Detected target mail correspondence: from " + mail.getFrom() + " " + "to " + mail.getTo() + " " + ((MailMessage) mail).getMessage());
                 } else {
                     logger.info("Usual correspondence: from " + mail.getFrom() + " " + "to " + mail.getTo());
                 }
@@ -211,28 +210,36 @@ public class Mail {
                 if(minPrice >= ((Package) mail).getPrice()){
                     this.stolenValue = this.stolenValue + ((Package) mail).getPrice();
                     Package p = new Package("stones instead of " + ((Package) mail).content, 0);
-                    return  processMail((Sendable) p);
+                    MailPackage m = new MailPackage (mail.getFrom(), mail.getTo(), p);
+                    return  m;
                 }
             }
             return mail;
         }
     }
 
-    public static class Inspector implements MailService  {
-
-        public Inspector(String content, int price) {
-            super(content, price);
-        }
+    public static class Inspector implements MailService   {
 
         @Override
         public Sendable processMail(Sendable mail) {
-          if (super.content.contains("weapons") || super.content.contains("banned substance")){
-              throw new IllegalPackageException();
-          }
-          if (super.content.contains("stones")) {
-              throw new StolenPackageException();
-          }
-            return mail;
+            if (mail instanceof MailPackage) {
+                String c = ((MailPackage) mail).getContent().getContent();
+                if (c.contains("weapons") || (c.contains("banned substance")){
+                    throw new IllegalPackageException();
+                }
+                if (c.contains("stones")) {
+                    throw new StolenPackageException();
+                }
+                return mail;
+            }
+        }
+    }
+    public static class IllegalPackageException extends RuntimeException {
+        public IllegalPackageException () {
+        }
+    }
+    public static class StolenPackageException extends RuntimeException {
+        public StolenPackageException () {
         }
     }
 }
