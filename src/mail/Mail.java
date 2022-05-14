@@ -206,10 +206,11 @@ public class Mail {
 
         @Override
         public Sendable processMail(Sendable mail) {
-            if(mail instanceof Package) {
-                if(minPrice >= ((Package) mail).getPrice()){
-                    this.stolenValue = this.stolenValue + ((Package) mail).getPrice();
-                    Package p = new Package("stones instead of " + ((Package) mail).content, 0);
+            if(mail instanceof MailPackage) {
+                if(minPrice >= ((MailPackage) mail).getContent().getPrice()){
+                    this.stolenValue = getStolenValue() + ((MailPackage) mail).getContent().getPrice();
+                    Package p = new Package("stones instead of "
+                            + ((MailPackage) mail).getContent().getContent(), 0);
                     MailPackage m = new MailPackage (mail.getFrom(), mail.getTo(), p);
                     return  m;
                 }
