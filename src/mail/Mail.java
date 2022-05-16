@@ -4,6 +4,9 @@ import  java.util.logging.*;
 import static java.lang.String.format;
 
 public class Mail {
+    public static final String AUSTIN_POWERS = "Austin Powers";
+    public static final String WEAPONS = "weapons";
+    public static final String BANNED_SUBSTANCE = "banned substance";
 
     /*Интерфейс, который задает класс,
     который может каким-либо образом обработать почтовый объект.*/
@@ -151,9 +154,6 @@ public class Mail {
 
         private MailService real = new RealMailService();
 
-        //todo  последовательно передает этот объект набору третьих лиц, а затем, в конце концов,
-        // передает получившийся объект непосредственно экземпляру RealMailService
-
         @Override
         public Sendable processMail(Sendable mail) {
             Sendable m = mail;
@@ -162,8 +162,8 @@ public class Mail {
             }
             return real.processMail(m);
         }
-        //todo метод getRealMailService, который возвращает ссылку на внутренний экземпляр RealMailService.
-        public MailService getReal() {
+
+        public MailService getRealMailService() {
             return real;
         }
     }
@@ -180,10 +180,13 @@ public class Mail {
         public Sendable processMail(Sendable mail) {
 
             if(mail instanceof MailMessage) {
-                if (mail.getFrom().equals("Austin Powers") || mail.getTo().equals("Austin Powers")) {
-                    logger.warning("Detected target mail correspondence: from " + mail.getFrom() + " " + "to " + mail.getTo() + " " + ((MailMessage) mail).getMessage());
+                if (mail.getFrom().equals(AUSTIN_POWERS) || mail.getTo().equals(AUSTIN_POWERS)) {
+                    logger.warning("Detected target mail correspondence: from "
+                            + mail.getFrom() + " to " + mail.getTo()
+                            + " \"" + ((MailMessage) mail).getMessage() + "\"");
                 } else {
-                    logger.info("Usual correspondence: from " + mail.getFrom() + " " + "to " + mail.getTo());
+                    logger.info("Usual correspondence: from " + mail.getFrom()
+                            + " to " + mail.getTo());
                 }
             }
             return mail;
@@ -203,14 +206,14 @@ public class Mail {
             return this.stolenValue;
         }
 
-
         @Override
         public Sendable processMail(Sendable mail) {
-            if(mail instanceof Package) {
-                if(minPrice >= ((Package) mail).getPrice()){
-                    this.stolenValue = this.stolenValue + ((Package) mail).getPrice();
-                    Package p = new Package("stones instead of " + ((Package) mail).content, 0);
-                    MailPackage m = new MailPackage (mail.getFrom(), mail.getTo(), p);
+            if(mail instanceof MailPackage) {
+                if(minPrice <= ((MailPackage) mail).getContent().getPrice()){
+                    this.stolenValue = getStolenValue() + ((MailPackage) mail).getContent().getPrice();
+                    Package p = new Package("stones instead of "
+                            + ((MailPackage) mail).getContent().getContent(), 0);
+                    MailPackage m = new MailPackage (mail.getTo(), mail.getFrom(), p);
                     return  m;
                 }
             }
@@ -224,7 +227,7 @@ public class Mail {
         public Sendable processMail(Sendable mail) {
             if (mail instanceof MailPackage) {
                 String c = ((MailPackage) mail).getContent().getContent();
-                if (c.contains("weapons") || (c.contains("banned substance"))){
+                if (c.equals(WEAPONS) || (c.equals(BANNED_SUBSTANCE))){
                     throw new IllegalPackageException();
                 }
                 if (c.contains("stones")) {
